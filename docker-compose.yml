@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  haproxy1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: haproxy1
+    networks:
+      yahya_prive:
+        ipv4_address: 10.0.0.150
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8888:80"
+      - "8404:8404"
+    volumes:
+      - C:\Users\John macmillan\Desktop\python_project\haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - C:\Users\John macmillan\Desktop\python_project\keepalived_primary.conf:/etc/keepalived/keepalived.conf:ro
+    depends_on:
+      - web1
+      - web2
+      - web3
+    entrypoint: ["/bin/sh", "-c", "keepalived -D -f /etc/keepalived/keepalived.conf && haproxy -f /usr/local/etc/haproxy/haproxy.cfg"]
+
+  haproxy2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: haproxy2
+    networks:
+      yahya_prive:
+        ipv4_address: 10.0.0.155
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8800:80"
+      - "8405:8404"
+    volumes:
+      - C:\Users\John macmillan\Desktop\python_project\haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - C:\Users\John macmillan\Desktop\python_project\keepalived_bck.conf:/etc/keepalived/keepalived.conf:ro
+    depends_on:
+      - web1
+      - web2
+      - web3
+    entrypoint: ["/bin/sh", "-c", "keepalived -D -f /etc/keepalived/keepalived.conf && haproxy -f /usr/local/etc/haproxy/haproxy.cfg"]
+
+  web1:
+    image: webapp_test
+    container_name: web1
+    networks:
+      - yahya_prive
+
+  web2:
+    image: webapp_test
+    container_name: web2
+    networks:
+      - yahya_prive
+
+  web3:
+    image: webapp_test
+    container_name: web3
+    networks:
+      - yahya_prive
+
+networks:
+  yahya_prive:
+   driver: bridge
+   #specify the driver 
+   ipam:  
+    config : 
+       - subnet: 10.0.0.0/24
+         gateway: 10.0.0.1
+       
+   
+    
